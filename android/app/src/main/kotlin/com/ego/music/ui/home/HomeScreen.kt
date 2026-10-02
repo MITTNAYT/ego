@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ego.domain.model.Artist
 import com.ego.domain.model.Track
-import com.ego.music.ui.HomeData
+import com.ego.domain.usecase.HomeData
 import com.ego.music.ui.theme.*
 
 @Composable

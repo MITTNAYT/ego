@@ -110,9 +110,10 @@ fun LyricsSheet(
                         fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium
                     )
 
-                    if (showRomanized && lyric.romanized != null) {
+                    val romanizedText = lyric.romanized
+                    if (showRomanized && romanizedText != null) {
                         Text(
-                            text = lyric.romanized,
+                            text = romanizedText,
                             color = if (isActive) TextSecondary else TextMuted,
                             fontSize = 14.sp,
                             modifier = Modifier.padding(top = 4.dp)
