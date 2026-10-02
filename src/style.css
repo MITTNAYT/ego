@@ -1424,3 +1424,72 @@ body {
   box-shadow: var(--shadow-card);
   pointer-events: all;
 }
+
+/* Sleep Timer Modal Buttons */
+.timer-option-btn {
+  background: #141418;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.timer-option-btn:hover {
+  background: #1b1b22;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.timer-option-btn.active {
+  background: #202028;
+  border-color: #ffffff;
+}
+
+.timer-num {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.timer-unit {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
+
+/* Zen Focus Mode */
+body.gs-zen-mode #browser-chrome-bar,
+body.gs-zen-mode #left-dock-strip,
+body.gs-zen-mode #sidebar-column,
+body.gs-zen-mode #right-column {
+  display: none !important;
+}
+
+body.gs-zen-mode #main-application-frame {
+  border-radius: 0;
+  border: none;
+  max-width: 100vw;
+  height: calc(100vh - 84px);
+}
+
+body.gs-zen-mode #main-frame-columns {
+  grid-template-columns: 1fr;
+}
+
+body.gs-zen-mode #app-viewport-root {
+  padding: 0;
+  gap: 0;
+}
+
+/* Offline state indicators */
+.ctrl-btn.active svg {
+  color: #ffffff;
+}
+

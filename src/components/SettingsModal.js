@@ -74,9 +74,55 @@ export function renderSettingsModal() {
           </div>
         </div>
 
+        <!-- Section 3: Cross-Platform Sync & Backup -->
+        <div>
+          <div style="font-family: var(--font-heading); font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Cross-Platform Sync & Backup
+          </div>
+          <div style="background: rgba(10, 12, 18, 0.6); border-radius: var(--radius-md); padding: 14px; border: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+            <div style="color: var(--text-secondary); font-size: 12px; line-height: 1.4;">
+              Export your liked tracks, custom playlists, and equalizer presets to a unified JSON file compatible between Ego Web and Native Android.
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" id="btn-export-backup" style="flex: 1; min-width: 140px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export Library (.json)
+              </button>
+              <label class="btn btn-secondary" style="flex: 1; min-width: 140px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; margin-bottom: 0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Restore Backup
+                <input type="file" id="input-import-backup" accept=".json" style="display: none;" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Offline Storage Manager -->
+        <div>
+          <div style="font-family: var(--font-heading); font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+            Offline Storage
+          </div>
+          <div style="background: rgba(10, 12, 18, 0.6); border-radius: var(--radius-md); padding: 14px; border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+            <div>
+              <div style="font-weight: 600;">Downloaded Tracks</div>
+              <div style="color: var(--text-muted); font-size: 11px;">
+                ${state.state.offlineTrackIds ? state.state.offlineTrackIds.size : 0} tracks cached in IndexedDB
+              </div>
+            </div>
+            <button class="btn btn-secondary" id="btn-clear-offline" style="border-color: rgba(244, 63, 94, 0.3); color: #f43f5e; padding: 6px 12px; font-size: 12px;">
+              Clear All Cache
+            </button>
+          </div>
+        </div>
+
         <!-- About Sonora / Ego -->
-        <div style="font-size: 11px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
-          <strong>Ego Music Client</strong> v0.42.0 • Inspired by Sonora • GPUI Native Design System replica.
+        <div style="font-size: 11px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--border-subtle); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>Ego Music Player</strong> v1.2.0 • Pure Black Monochrome Edition
+          </div>
+          <span class="badge-version" style="color: #ffffff; border-color: rgba(255,255,255,0.2);">PWA Offline Ready</span>
         </div>
       </div>
     </div>

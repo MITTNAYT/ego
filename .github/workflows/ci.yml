@@ -39,11 +39,16 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Validate Android Modules Structure
+      - name: Validate Android Modules & Test Suites
         run: |
           echo "Verifying Clean Architecture module boundaries..."
           test -d android/domain/src/main/kotlin/com/ego/domain
           test -d android/data/src/main/kotlin/com/ego/data
           test -d android/app/src/main/kotlin/com/ego/music
           test -d android/core/src/main/kotlin/com/ego/core
-          echo "All Clean Architecture modules present."
+          echo "Verifying Domain & Data Unit Test suites..."
+          test -f android/domain/src/test/kotlin/com/ego/domain/usecase/PlaybackUseCasesTest.kt
+          test -f android/domain/src/test/kotlin/com/ego/domain/usecase/GetHomeDataUseCaseTest.kt
+          test -f android/domain/src/test/kotlin/com/ego/domain/usecase/SyncUseCasesTest.kt
+          test -f android/data/src/test/kotlin/com/ego/data/repository/MusicRepositoryImplTest.kt
+          echo "All Clean Architecture modules and test suites verified."

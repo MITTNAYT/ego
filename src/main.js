@@ -9,7 +9,10 @@ import { renderLyricsModal } from './components/LyricsModal.js';
 import { renderEqualizerModal } from './components/EqualizerModal.js';
 import { renderQueueModal } from './components/QueueModal.js';
 import { renderSettingsModal } from './components/SettingsModal.js';
+import { renderSleepTimerModal } from './components/SleepTimerModal.js';
 import { setupVisualizer } from './components/Visualizer.js';
+import { downloadBackupFile, restoreBackupFromJson } from './services/syncBridge.js';
+import { clearAllOfflineTracks } from './services/offlineStorage.js';
 import { renderHomeView } from './views/HomeView.js';
 import { renderExploreView } from './views/ExploreView.js';
 import { renderSearchView } from './views/SearchView.js';
@@ -82,6 +85,9 @@ function renderApp() {
       </div>
 
       <div class="chrome-right-group">
+        <svg id="chrome-btn-zen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Zen Focus Mode (F)" style="cursor: pointer;">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
         <svg id="chrome-btn-share" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="Share Music">
           <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
           <polyline points="16 6 12 2 8 6"></polyline>
@@ -138,6 +144,12 @@ function renderApp() {
           </svg>
         </button>
 
+        <button class="dock-icon-btn ${state.state.sleepTimerOpen || (state.state.sleepTimer && state.state.sleepTimer.active) ? 'active' : ''}" id="btn-dock-sleeptimer" title="Sleep Timer (T)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
         <button class="dock-icon-btn ${state.state.settingsOpen ? 'active' : ''}" id="btn-dock-settings" title="Settings">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
@@ -166,6 +178,7 @@ function renderApp() {
     ${renderEqualizerModal()}
     ${renderQueueModal()}
     ${renderSettingsModal()}
+    ${renderSleepTimerModal()}
 
     <!-- Toast Notifications Container -->
     <div id="toast-container">
@@ -366,6 +379,86 @@ function attachEventListeners() {
     });
   }
 
+  // Zen Mode toggle
+  document.querySelector('#chrome-btn-zen')?.addEventListener('click', () => state.toggleZenMode());
+
+  // Sleep Timer triggers
+  const toggleSleepTimer = () => {
+    state.state.sleepTimerOpen = !state.state.sleepTimerOpen;
+    state.emit('change');
+  };
+  document.querySelector('#btn-dock-sleeptimer')?.addEventListener('click', toggleSleepTimer);
+  document.querySelector('#btn-player-sleeptimer')?.addEventListener('click', toggleSleepTimer);
+  document.querySelector('#btn-close-sleeptimer')?.addEventListener('click', () => {
+    state.state.sleepTimerOpen = false;
+    state.emit('change');
+  });
+  document.querySelector('#sleeptimer-modal-backdrop')?.addEventListener('click', (e) => {
+    if (e.target.id === 'sleeptimer-modal-backdrop') {
+      state.state.sleepTimerOpen = false;
+      state.emit('change');
+    }
+  });
+
+  // Sleep timer duration buttons
+  document.querySelectorAll('.timer-option-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mins = btn.getAttribute('data-mins');
+      const mode = btn.getAttribute('data-mode');
+      if (mode === 'end_of_track') {
+        state.startSleepTimer(0, 'end_of_track');
+      } else if (mins) {
+        state.startSleepTimer(parseInt(mins, 10));
+      }
+      state.state.sleepTimerOpen = false;
+    });
+  });
+  document.querySelector('#btn-cancel-sleeptimer')?.addEventListener('click', () => {
+    state.cancelSleepTimer();
+    state.state.sleepTimerOpen = false;
+  });
+
+  // Offline Download for current track
+  document.querySelector('#btn-player-download')?.addEventListener('click', () => {
+    state.toggleOfflineDownload(state.state.currentTrack);
+  });
+  document.querySelector('#btn-player-like')?.addEventListener('click', () => {
+    state.toggleLike(state.state.currentTrack.id);
+  });
+
+  // Cross-Platform Sync: Export and Import
+  document.querySelector('#btn-export-backup')?.addEventListener('click', () => {
+    downloadBackupFile();
+    state.showToast('Exported library backup (.json)', 'success');
+  });
+
+  const importInput = document.querySelector('#input-import-backup');
+  if (importInput) {
+    importInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+          try {
+            const res = await restoreBackupFromJson(evt.target.result);
+            state.showToast(`Restored: ${res.importedLikesCount} likes, ${res.importedPlaylistsCount} playlists`, 'success');
+          } catch (err) {
+            state.showToast(`Restore error: ${err.message}`, 'error');
+          }
+        };
+        reader.readAsText(file);
+      }
+    });
+  }
+
+  // Clear offline cache
+  document.querySelector('#btn-clear-offline')?.addEventListener('click', async () => {
+    await clearAllOfflineTracks();
+    state.state.offlineTrackIds.clear();
+    state.showToast('Cleared all cached offline songs', 'info');
+    state.emit('change');
+  });
+
   // Modals close buttons
   document.querySelector('#btn-close-lyrics')?.addEventListener('click', () => state.toggleLyrics());
   document.querySelector('#btn-close-fs-lyrics')?.addEventListener('click', () => state.toggleLyrics(true));
@@ -509,8 +602,18 @@ window.addEventListener('keydown', (e) => {
     state.toggleEqualizer();
   } else if (e.key.toLowerCase() === 'q') {
     state.toggleQueue();
+  } else if (e.key.toLowerCase() === 't') {
+    state.state.sleepTimerOpen = !state.state.sleepTimerOpen;
+    state.emit('change');
+  } else if (e.key.toLowerCase() === 'f') {
+    state.toggleZenMode();
   } else if (e.key === 'Escape') {
-    if (state.state.lyricsFullscreen) state.toggleLyrics(true);
+    if (state.state.zenMode) state.toggleZenMode();
+    else if (state.state.sleepTimerOpen) {
+      state.state.sleepTimerOpen = false;
+      state.emit('change');
+    }
+    else if (state.state.lyricsFullscreen) state.toggleLyrics(true);
     else if (state.state.lyricsOpen) state.toggleLyrics();
     else if (state.state.eqOpen) state.toggleEqualizer();
     else if (state.state.queueOpen) state.toggleQueue();
@@ -575,3 +678,12 @@ state.subscribe((currentState, event, data) => {
 // Initial boot
 renderApp();
 console.log('Ego Music: Groovesync Black Monochrome Desktop UI initialized.');
+
+// Service Worker for offline PWA capabilities
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('ServiceWorker registration error:', err);
+    });
+  });
+}

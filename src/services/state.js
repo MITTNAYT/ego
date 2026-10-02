@@ -1,5 +1,12 @@
 import { INITIAL_TRACKS, PLAYLISTS, QUEUE_DEFAULT } from '../data/tracks.js';
 import { audioEngine } from './audioEngine.js';
+import { 
+  isTrackOffline, 
+  saveTrackForOffline, 
+  removeTrackOffline, 
+  getCachedTrackAudioUrl, 
+  getAllOfflineTracks 
+} from './offlineStorage.js';
 
 class StateManager {
   constructor() {
@@ -46,6 +53,13 @@ class StateManager {
       eqBands: new Array(10).fill(0),
       eqPreAmp: 0,
 
+      // Offline & Download state
+      offlineTrackIds: new Set(),
+
+      // Power-user tools
+      sleepTimer: { active: false, remainingSeconds: 0, mode: 'time' },
+      zenMode: false,
+
       // Scrobbling status
       scrobbling: {
         lastFm: true,
@@ -72,6 +86,7 @@ class StateManager {
 
     this.subscribers = new Set();
     this.setupAudioEngineBridge();
+    this.initOfflineTracks();
   }
 
   setupAudioEngineBridge() {
@@ -137,10 +152,15 @@ class StateManager {
     }
 
     try {
-      await audioEngine.loadAndPlay(track.audioUrl);
+      let audioUrlToPlay = track.audioUrl;
+      const offlineUrl = await getCachedTrackAudioUrl(track.id);
+      if (offlineUrl) {
+        audioUrlToPlay = offlineUrl;
+      }
+      await audioEngine.loadAndPlay(audioUrlToPlay);
       this.state.isPlaying = true;
       this.state.scrobbling.sessionScrobbles += 1;
-      this.showToast(`Now playing: ${track.title}`, 'info');
+      this.showToast(`Now playing: ${track.title}${offlineUrl ? ' ⚡ (Offline)' : ''}`, 'info');
     } catch (err) {
       console.warn('Playback start error:', err);
     }
@@ -202,6 +222,15 @@ class StateManager {
   }
 
   handleTrackEnded() {
+    if (this.state.sleepTimer.active && this.state.sleepTimer.mode === 'end_of_track') {
+      this.cancelSleepTimer();
+      audioEngine.pause();
+      this.state.isPlaying = false;
+      this.showToast('Sleep timer reached: Stopped playback at end of track', 'info');
+      this.emit('change');
+      return;
+    }
+
     if (this.state.repeatMode === 'one') {
       audioEngine.seek(0);
       audioEngine.play();
@@ -411,6 +440,119 @@ class StateManager {
       this.state.toasts = this.state.toasts.filter(t => t.id !== id);
       this.emit('change');
     }, 3000);
+  }
+
+  // Offline Storage Bridge
+  async initOfflineTracks() {
+    try {
+      const offlineList = await getAllOfflineTracks();
+      this.state.offlineTrackIds = new Set(offlineList.map(t => t.id));
+      this.emit('change');
+    } catch (e) {
+      console.warn('Could not initialize offline tracks:', e);
+    }
+  }
+
+  async toggleOfflineDownload(track) {
+    if (!track) return;
+    if (this.state.offlineTrackIds.has(track.id)) {
+      try {
+        await removeTrackOffline(track.id);
+        this.state.offlineTrackIds.delete(track.id);
+        this.showToast(`Removed "${track.title}" from offline downloads`, 'info');
+      } catch (err) {
+        this.showToast(`Error removing offline track: ${err.message}`, 'error');
+      }
+    } else {
+      this.showToast(`Downloading "${track.title}" for offline playback...`, 'info');
+      try {
+        await saveTrackForOffline(track);
+        this.state.offlineTrackIds.add(track.id);
+        this.showToast(`Saved "${track.title}" offline ⚡`, 'success');
+      } catch (err) {
+        this.showToast(`Failed to download: ${err.message}`, 'error');
+      }
+    }
+    this.emit('change');
+  }
+
+  // Sleep Timer Controller
+  startSleepTimer(minutes, mode = 'time') {
+    this.cancelSleepTimer();
+
+    if (mode === 'end_of_track') {
+      this.state.sleepTimer = { active: true, mode: 'end_of_track', remainingSeconds: 0 };
+      this.showToast('Sleep timer set: Stopping at end of track 🌙', 'info');
+      this.emit('change');
+      return;
+    }
+
+    const totalSeconds = minutes * 60;
+    this.state.sleepTimer = {
+      active: true,
+      mode: 'time',
+      remainingSeconds: totalSeconds
+    };
+    this.showToast(`Sleep timer set: ${minutes} min 🌙`, 'info');
+    this.emit('change');
+
+    this._sleepTimerInterval = setInterval(() => {
+      if (!this.state.sleepTimer.active) {
+        clearInterval(this._sleepTimerInterval);
+        return;
+      }
+
+      this.state.sleepTimer.remainingSeconds -= 1;
+
+      // Smooth volume fade during last 15 seconds
+      if (this.state.sleepTimer.remainingSeconds <= 15 && this.state.sleepTimer.remainingSeconds > 0) {
+        const factor = this.state.sleepTimer.remainingSeconds / 15;
+        audioEngine.setVolume(this.state.volume * factor);
+      }
+
+      if (this.state.sleepTimer.remainingSeconds <= 0) {
+        this.cancelSleepTimer();
+        audioEngine.pause();
+        audioEngine.setVolume(this.state.volume); // restore original volume setting
+        this.state.isPlaying = false;
+        this.showToast('Sleep timer ended: Music paused 💤', 'info');
+        this.emit('change');
+      } else {
+        this.emit('change');
+      }
+    }, 1000);
+  }
+
+  cancelSleepTimer() {
+    if (this._sleepTimerInterval) {
+      clearInterval(this._sleepTimerInterval);
+      this._sleepTimerInterval = null;
+    }
+    if (this.state.sleepTimer.active) {
+      audioEngine.setVolume(this.state.volume);
+    }
+    this.state.sleepTimer = { active: false, mode: 'time', remainingSeconds: 0 };
+    this.emit('change');
+  }
+
+  // Zen Mode (Pure Monochrome Focus Fullscreen)
+  toggleZenMode() {
+    this.state.zenMode = !this.state.zenMode;
+    const appEl = document.querySelector('.gs-window-frame') || document.documentElement;
+    if (this.state.zenMode) {
+      document.body.classList.add('gs-zen-mode');
+      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+      this.showToast('Zen Focus Mode active. Press Esc to exit.', 'info');
+    } else {
+      document.body.classList.remove('gs-zen-mode');
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      this.showToast('Exited Zen Mode', 'info');
+    }
+    this.emit('change');
   }
 
   getAllAvailableTracks() {

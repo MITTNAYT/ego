@@ -1,0 +1,37 @@
+{
+  "name": "Ego Music Player",
+  "short_name": "Ego",
+  "description": "Pure Black Monochrome Lossless Music Experience with Studio-Grade Web Audio Engine",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070709",
+  "theme_color": "#070709",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment", "audio"],
+  "shortcuts": [
+    {
+      "name": "Play / Pause",
+      "url": "/?action=play_pause",
+      "description": "Toggle music playback"
+    },
+    {
+      "name": "Equalizer",
+      "url": "/?modal=equalizer",
+      "description": "Open 10-Band Parametric Equalizer"
+    },
+    {
+      "name": "Local Music",
+      "url": "/?view=collections&tab=local",
+      "description": "Open Local Audio Files"
+    }
+  ]
+}
