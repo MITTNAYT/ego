@@ -72,15 +72,20 @@ class SyncUseCasesTest {
     private class FakeMusicRepository : MusicRepository {
         val toggledIds = mutableListOf<String>()
 
-        override fun getTracks(): Flow<List<com.ego.domain.model.Track>> = emptyFlow()
         override fun getTrendingTracks(): Flow<List<com.ego.domain.model.Track>> = emptyFlow()
         override fun getPopularArtists(): Flow<List<com.ego.domain.model.Artist>> = emptyFlow()
         override fun getRecentlyPlayed(): Flow<List<com.ego.domain.model.Track>> = emptyFlow()
-        override fun getLikedTracks(): Flow<List<com.ego.domain.model.Track>> = emptyFlow()
-        override suspend fun searchTracks(query: String): List<com.ego.domain.model.Track> = emptyList()
+        override fun getCollections(): Flow<List<com.ego.domain.model.CollectionItem>> = emptyFlow()
+        override fun getAllTracks(): Flow<List<com.ego.domain.model.Track>> = emptyFlow()
+        override fun searchTracks(query: String): Flow<List<com.ego.domain.model.Track>> = emptyFlow()
 
-        override suspend fun toggleLike(trackId: String) {
+        override suspend fun toggleLike(trackId: String): Result<Boolean> {
             toggledIds.add(trackId)
+            return Result.success(true)
+        }
+
+        override suspend fun scanLocalMusic(): Result<List<com.ego.domain.model.Track>> {
+            return Result.success(emptyList())
         }
     }
 }
