@@ -53,12 +53,33 @@ android/
 ---
 
 ## 🛠️ Build & Run
+
+### Local Compilation
 ```bash
 cd android
 
-# Build debug APK
-./gradlew assembleDebug
+# Build debug APK locally
+./gradlew :app:assembleDebug
+
+# Or using the helper script
+./build-apk.sh     # macOS / Linux
+build-apk.bat      # Windows
 
 # Run unit tests across all modules
 ./gradlew test
 ```
+
+---
+
+## 🚀 Automated APK Release Pipeline (GitHub Actions)
+
+Ego features an automated CI/CD pipeline that compiles, tests, and publishes Android APKs on GitHub:
+
+1. **Automatic Workflow Artifacts**:
+   - Every push modifying `android/**` triggers `.github/workflows/android-release.yml`.
+   - The workflow compiles `:app:assembleDebug` and uploads `ego-music-player-apk` to GitHub Actions Artifacts.
+2. **GitHub Releases with APK**:
+   - Pushing any git tag starting with `v*` (e.g. `git tag v1.0.0 && git push origin v1.0.0`) automatically compiles the APK, creates a GitHub Release, and attaches `ego-music-player-v1.0.0-debug.apk` ready for direct phone download and installation!
+3. **Manual Trigger (`workflow_dispatch`)**:
+   - Trigger a build anytime directly from GitHub Actions tab with the "Publish as GitHub Release" checkbox.
+

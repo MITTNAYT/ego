@@ -1,6 +1,7 @@
 # Ego Music Player (GrooveSync Edition) 🖤🎶
 
 [![CI/CD](https://github.com/MITTNAYT/ego/actions/workflows/ci.yml/badge.svg)](https://github.com/MITTNAYT/ego/actions)
+[![Android APK](https://github.com/MITTNAYT/ego/actions/workflows/android-release.yml/badge.svg)](https://github.com/MITTNAYT/ego/actions/workflows/android-release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-purple.svg)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Jetpack%20Compose-2024.12-green.svg)](https://developer.android.com/jetpack/compose)
