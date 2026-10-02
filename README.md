@@ -49,10 +49,10 @@
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/MITTNAYT/ego-music-player.git
+git clone https://github.com/MITTNAYT/ego.git
 
 # Navigate into project directory
-cd ego-music-player
+cd ego
 
 # Install dependencies
 npm install
