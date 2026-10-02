@@ -71,14 +71,31 @@ npm run preview
 
 ---
 
+## 📱 Android Native App (`/android`)
+
+Ego includes a native Android counterpart crafted with **Kotlin**, **Jetpack Compose**, and **Android Clean Architecture**:
+
+- **Modules**:
+  - `:app`: Jetpack Compose UI, Material3 black monochrome theme, ViewModels (`UDF`).
+  - `:domain`: Pure Kotlin entities (`Track`, `Artist`, `PlaybackState`) and UseCases.
+  - `:data`: InMemory & MediaStore data sources, Media3 / ExoPlayer state management.
+  - `:core`: Coroutine Dispatchers, Resource state wrappers.
+- **Mobile UI**:
+  - Adaptive monochrome cards & bottom navigation tabs.
+  - Floating player pill docked with progress indicators.
+  - Fullscreen Now Playing sheet with animated soundwaves & lyrics.
+  - 10-band parametric EQ dialog.
+
+See [`android/README.md`](android/README.md) for full architecture details.
+
+---
+
 ## 🛠️ Tech Stack
-- **Framework**: Vanilla JavaScript (ES Modules)
-- **Styling**: Pure Modern CSS (CSS Variables, Flexbox, CSS Grid)
-- **Bundler**: Vite
-- **Audio Processing**: Web Audio API (`AudioContext`, `BiquadFilterNode`, `GainNode`)
-- **Metadata Parser**: `jsmediatags`
+- **Web App**: Vanilla JavaScript (ES Modules), Modern CSS, Vite, Web Audio API, `jsmediatags`
+- **Android App**: Kotlin 2.1, Jetpack Compose, Material3, AndroidX Media3 / ExoPlayer, Coroutines & Flow
 
 ---
 
 ## 📄 License
 MIT License. Created by [MITTNAYT](https://github.com/MITTNAYT).
+
