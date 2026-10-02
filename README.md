@@ -1,5 +1,10 @@
 # Ego Music Player (GrooveSync Edition) 🖤🎶
 
+[![CI/CD](https://github.com/MITTNAYT/ego/actions/workflows/ci.yml/badge.svg)](https://github.com/MITTNAYT/ego/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-purple.svg)](https://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/Jetpack%20Compose-2024.12-green.svg)](https://developer.android.com/jetpack/compose)
+
 > **Pure Black Monochrome Lossless Music Experience**  
 > Inspired by GrooveSync desktop architecture with zero glassmorphism, matte obsidian surfaces, and a studio-grade Web Audio API engine.
 
@@ -73,20 +78,26 @@ npm run preview
 
 ## 📱 Android Native App (`/android`)
 
-Ego includes a native Android counterpart crafted with **Kotlin**, **Jetpack Compose**, and **Android Clean Architecture**:
+Ego includes a production-grade native Android counterpart crafted with **Kotlin 2.1**, **Jetpack Compose**, and strict **Android Clean Architecture**:
 
-- **Modules**:
-  - `:app`: Jetpack Compose UI, Material3 black monochrome theme, ViewModels (`UDF`).
-  - `:domain`: Pure Kotlin entities (`Track`, `Artist`, `PlaybackState`) and UseCases.
-  - `:data`: InMemory & MediaStore data sources, Media3 / ExoPlayer state management.
-  - `:core`: Coroutine Dispatchers, Resource state wrappers.
-- **Mobile UI**:
-  - Adaptive monochrome cards & bottom navigation tabs.
-  - Floating player pill docked with progress indicators.
-  - Fullscreen Now Playing sheet with animated soundwaves & lyrics.
-  - 10-band parametric EQ dialog.
+- **Modular Architecture**:
+  - `:app`: Jetpack Compose UI, Material3 black monochrome theme, unidirectional data flow ViewModels (`StateFlow`), Spring physics animations, and haptic feedback.
+  - `:domain`: Pure Kotlin entities (`Track`, `Artist`, `PlaybackState`) and UseCases (`GetTracksUseCase`, `ControlPlaybackUseCase`, `GetEqualizerUseCase`) with zero Android dependencies.
+  - `:data`: Offline persistence (Room DB for likes, history, and custom playlists), Android MediaStore local audio scanner, and Media3 / ExoPlayer state management.
+  - `:core`: Structured concurrency Coroutine `DispatcherProvider` and Resource state wrappers.
+- **Dedicated Screens**:
+  - **Home**: Greeting header, trending landscape cards, verified artists, and recently played list.
+  - **Songs**: Complete track list with duration, like toggling, and instant queue playback.
+  - **Search**: Debounced real-time query filtering across tracks and artists with genre chips.
+  - **Artist Detail**: Hero verified banner, monthly listener stats, and artist top songs.
+  - **Collections**: Local music device scanner, custom playlists, and new playlist creation dialog.
+- **Micro-Interactions & Motion**:
+  - Physics-based spring animations (`Spring.DampingRatioLowBouncy`, `Spring.StiffnessMediumLow`).
+  - Haptic feedback on tap, toggle, and play interactions.
+  - Fullscreen Now Playing modal with animated soundwave visualizer & live synced lyrics.
+  - 10-band parametric EQ sheet with presets.
 
-See [`android/README.md`](android/README.md) for full architecture details.
+See [`android/README.md`](android/README.md) for full architecture and test setup.
 
 ---
 

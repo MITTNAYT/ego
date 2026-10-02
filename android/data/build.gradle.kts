@@ -34,6 +34,10 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session)
 
+    // Room for offline caching and local database
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
 }
